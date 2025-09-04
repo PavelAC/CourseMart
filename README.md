@@ -68,5 +68,5 @@ This project is for **educational purposes** – the goal is to learn how to:
 
 ### 1. Clone Repository
 ```bash
-git clone https://github.com/YOUR_USERNAME/coursemart.git
+git clone https://github.com/PavelAC/CourseMart.git
 cd coursemart
