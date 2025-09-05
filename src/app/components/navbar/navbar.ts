@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
 import { MaterialModule } from '../../material.module';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-navbar',
-  imports: [MaterialModule],
+  imports: [MaterialModule, RouterModule],
   templateUrl: './navbar.html',
-  styleUrl: './navbar.css'
+  styleUrls: ['./navbar.css']
 })
 export class Navbar {
 

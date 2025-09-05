@@ -62,36 +62,6 @@ button:hover, .mat-button:hover, .mat-raised-button:hover {
 	box-shadow: 0 8px 24px rgba(10, 23, 78, 0.12);
 }
 
-.btn-primary {
-	padding: 1.2rem 2.5rem;
-	background: linear-gradient(45deg, var(--clr-accent), var(--clr-orange));
-	color: var(--clr-dark);
-	text-decoration: none;
-	border-radius: 50px;
-	font-weight: 600;
-	font-size: 1.1rem;
-	transition: all 0.3s ease;
-	box-shadow: 0 10px 30px rgba(245,208,66,0.3);
-}
-.btn-secondary {
-	padding: 1.2rem 2.5rem;
-	background: transparent;
-	color: var(--clr-light);
-	text-decoration: none;
-	border: 2px solid var(--clr-light);
-	border-radius: 50px;
-	font-weight: 600;
-	font-size: 1.1rem;
-	transition: all 0.3s ease;
-}
-.btn-primary:hover, .btn-secondary:hover {
-	transform: translateY(-3px);
-}
-.btn-secondary:hover {
-	background: var(--clr-light);
-	color: var(--clr-dark);
-}
-
 a {
 	color: var(--clr-accent);
 	text-decoration: none;
@@ -117,13 +87,6 @@ strong {
 	box-shadow: 0 2px 8px rgba(10, 23, 78, 0.05);
 }
 
-/* .section {
-	margin-top: 4rem;
-	margin-bottom: 2rem;
-	background: var(--section-bg);
-	padding: 2rem 1.5rem;
-	border-radius: 6px;
-} */
 
 @media (min-width: 640px) {
 	.container { max-width: 640px; }
@@ -152,4 +115,75 @@ strong {
 	display: inline-block;
 	vertical-align: top;
 	width: 300px;
+}
+
+/* === Global CourseMart Shared Styles === */
+
+/* Glassmorphism utility */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* Gradient text utility */
+.gradient-text {
+  background: linear-gradient(45deg, var(--clr-accent), var(--clr-orange), var(--clr-accent));
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-shift 3s ease-in-out infinite;
+}
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Glassmorphism background for sections */
+.glass-section {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: 30px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* Button utilities (for .btn, .btn-primary, .btn-secondary) */
+.btn {
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+}
+.btn-primary {
+  background: linear-gradient(45deg, var(--clr-accent), var(--clr-orange));
+  color: var(--clr-dark);
+  box-shadow: 0 10px 30px rgba(245, 208, 66, 0.3);
+}
+.btn-secondary {
+  background: var(--glass-bg);
+  color: var(--clr-light);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(10px);
+}
+.btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive utility for buttons */
+@media (max-width: 768px) {
+  .btn { justify-content: center; }
 }

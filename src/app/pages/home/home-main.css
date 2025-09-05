@@ -64,7 +64,6 @@
 	max-width: 1200px;
 	margin: 4rem auto;
 	padding: 4rem 2rem 3rem 2rem;
-	background: linear-gradient(120deg, rgb(245, 245, 250) 60%, rgba(245,208,66,0.10) 100%);
 	border-radius: 32px;
 	box-shadow: 0 8px 40px 0 rgba(10,23,78,0.10), 0 1.5px 6px 0 rgba(79,70,229,0.08);
 	border: 1.5px solid rgba(79,70,229,0.08);
@@ -86,7 +85,6 @@
 	gap: 2.5rem 2rem;
 }
 .course-card {
-	background: #fff;
 	border-radius: 20px;
 	box-shadow: 0 2px 16px 0 rgba(10,23,78,0.06);
 	border: 1.5px solid rgba(79,70,229,0.08);
@@ -119,11 +117,11 @@
 	font-size: 1.45rem;
 	font-weight: 700;
 	margin-bottom: 0.7rem;
-	color: var(--clr-indigo);
+	color: var(--clr-accent);
 	letter-spacing: -0.5px;
 }
 .course-description {
-	color: #222a3a;
+	color: var(--clr-light);
 	opacity: 0.92;
 	margin-bottom: 1.2rem;
 	line-height: 1.6;
@@ -172,13 +170,11 @@
 .cta-section {
 	text-align: center;
 	padding: 6rem 2rem;
-	margin: 4rem 0;
+	margin: 5rem auto;
 	background: linear-gradient(135deg, rgba(79,70,229,0.2) 0%, rgba(245,208,66,0.2) 100%);
 	backdrop-filter: blur(20px);
 	border-radius: 30px;
 	max-width: 1000px;
-	margin-left: auto;
-	margin-right: auto;
 }
 .cta-title {
 	font-size: clamp(2rem, 5vw, 3rem);
