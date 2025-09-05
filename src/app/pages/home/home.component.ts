@@ -3,7 +3,7 @@ import { AfterViewInit, Component} from '@angular/core';
 @Component({
   selector: 'app-home',
   templateUrl: './home.html',
-  styleUrls: ['./home.css'],
+  styleUrls: ['./home-main.css', './home-hero.css'],
 })
 export class HomeComponent implements AfterViewInit {
   ngAfterViewInit(): void {

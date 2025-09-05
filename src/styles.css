@@ -62,6 +62,36 @@ button:hover, .mat-button:hover, .mat-raised-button:hover {
 	box-shadow: 0 8px 24px rgba(10, 23, 78, 0.12);
 }
 
+.btn-primary {
+	padding: 1.2rem 2.5rem;
+	background: linear-gradient(45deg, var(--clr-accent), var(--clr-orange));
+	color: var(--clr-dark);
+	text-decoration: none;
+	border-radius: 50px;
+	font-weight: 600;
+	font-size: 1.1rem;
+	transition: all 0.3s ease;
+	box-shadow: 0 10px 30px rgba(245,208,66,0.3);
+}
+.btn-secondary {
+	padding: 1.2rem 2.5rem;
+	background: transparent;
+	color: var(--clr-light);
+	text-decoration: none;
+	border: 2px solid var(--clr-light);
+	border-radius: 50px;
+	font-weight: 600;
+	font-size: 1.1rem;
+	transition: all 0.3s ease;
+}
+.btn-primary:hover, .btn-secondary:hover {
+	transform: translateY(-3px);
+}
+.btn-secondary:hover {
+	background: var(--clr-light);
+	color: var(--clr-dark);
+}
+
 a {
 	color: var(--clr-accent);
 	text-decoration: none;
