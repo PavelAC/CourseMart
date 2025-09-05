@@ -124,6 +124,28 @@
   color: rgba(245, 245, 250, 0.5);
 }
 
+.contact__cta {
+  display: inline-flex;
+  place-content: center;
+  gap: 1rem;
+  padding: 1.3rem 2.7rem;
+  background: linear-gradient(90deg, #F5D042, #ea580c);
+  color: var(--clr-dark);
+  text-decoration: none;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 1.25rem;
+  box-shadow: 0 10px 30px rgba(245, 208, 66, 0.25);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.contact__cta:hover {
+  transform: translateY(-6px) scale(1.04);
+  box-shadow: 0 20px 40px rgba(245, 208, 66, 0.35);
+  background-position: 100% 0;
+}
+
 /* Contact Info Section */
 .contact-info {
   border-radius: 30px;
