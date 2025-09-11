@@ -1,3 +1,5 @@
+import { Timestamp } from "firebase/firestore";
+
 // Interface for Firestore user data
 export interface UserProfile {
   uid?: string;
@@ -5,8 +7,8 @@ export interface UserProfile {
   displayName: string;
   photoURL?: string;
   role: 'student' | 'instructor' | 'admin';
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
   enrolledCourses?: string[];
   createdCourses?: string[]; // For instructors
   bio?: string;
