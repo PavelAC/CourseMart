@@ -204,4 +204,24 @@ export class DatabaseService {
       })
     );
   }
+
+    updateCourse(courseId: string, updates: Partial<Course>): Observable<void> {
+    const courseRef = doc(db, `courses/${courseId}`);
+    return from(updateDoc(courseRef, updates)).pipe(
+      catchError((error) => {
+        console.error('Firestore Error:', error);
+        return throwError(() => new Error('Failed to update course'));
+      })
+    );
+  }
+
+  deleteCourse(courseId: string): Observable<void> {
+    const courseRef = doc(db, `courses/${courseId}`);
+    return from(deleteDoc(courseRef)).pipe(
+      catchError((error) => {
+        console.error('Firestore Error:', error);
+        return throwError(() => new Error('Failed to delete course'));
+      })
+    );
+  }
 }
