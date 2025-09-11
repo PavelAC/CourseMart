@@ -15,7 +15,7 @@ import {
   runTransaction,
   Timestamp
 } from "firebase/firestore";
-import { catchError, from, map, Observable, tap, throwError } from "rxjs";
+import { catchError, from, map, Observable, switchMap, tap, throwError } from "rxjs";
 import { db } from "../../environments/environments";
 
 // Import all models
@@ -341,6 +341,77 @@ export class DatabaseService {
       catchError((error) => {
         console.error('Firestore Error:', error);
         return throwError(() => new Error('Failed to delete category'));
+      })
+    );
+  }
+
+  // ----------------------------
+  // ENROLLMENT CRUD
+  // ----------------------------
+
+  enrollInCourse(userId: string, courseId: string): Observable<void> {
+    const enrollmentsRef = collection(db, 'enrollments');
+    const q = query(enrollmentsRef,
+      where('userId', '==', userId),
+      where('courseId', '==', courseId)
+    );
+    return from(getDocs(q)).pipe(
+      map(querySnapshot => {
+        if (!querySnapshot.empty) {
+          throw new Error('User already enrolled in this course');
+        }
+        const enrollmentData: Omit<Enrollment, 'id'> = {
+          userId,
+          courseId,
+          enrollmentDate: Timestamp.fromDate(new Date()),
+          completionStatus: 0,
+          completedLessons: []
+        };
+        return enrollmentData;
+      }),
+      switchMap(enrollmentData => from(addDoc(enrollmentsRef, enrollmentData))),
+      map(() => void 0),
+      catchError((error) => {
+        console.error('Enrollment error:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  getUserEnrollments(userId: string): Observable<Enrollment[]> {
+    const enrollmentsRef = collection(db, 'enrollments');
+    const q = query(enrollmentsRef, where('userId', '==', userId));
+    return from(getDocs(q)).pipe(
+      map((querySnapshot) => {
+        return querySnapshot.docs.map((doc) => {
+          const data = doc.data();
+          let enrollmentDate = data["enrollmentDate"];
+          if (enrollmentDate && typeof enrollmentDate.toDate === 'function') {
+            enrollmentDate = enrollmentDate.toDate();
+          }
+          return {
+            id: doc.id,
+            ...data,
+            enrollmentDate
+          } as Enrollment;
+        });
+      }),
+      catchError((error) => {
+        console.error('Firestore Error:', error);
+        return throwError(() => new Error('Failed to get enrollments'));
+      })
+    );
+  }
+
+  updateEnrollmentProgress(enrollmentId: string, completedLessons: string[], completionStatus: number): Observable<void> {
+    const enrollmentRef = doc(db, `enrollments/${enrollmentId}`);
+    return from(updateDoc(enrollmentRef, {
+      completedLessons,
+      completionStatus
+    })).pipe(
+      catchError((error) => {
+        console.error('Firestore Error:', error);
+        return throwError(() => new Error('Failed to update enrollment progress'));
       })
     );
   }
