@@ -188,4 +188,20 @@ export class DatabaseService {
       })
     );
   }
+
+  addCourse(course: Omit<Course, 'id'>): Observable<string> {
+    const coursesRef = collection(db, 'courses');
+    const courseData = {
+      ...course,
+      createdAt: Timestamp.fromDate(new Date())
+    };
+    return from(addDoc(coursesRef, courseData)).pipe(
+      map((docRef) => docRef.id),
+      tap((courseId) => console.log('Course added with ID:', courseId)),
+      catchError((error) => {
+        console.error('Firestore Error:', error);
+        return throwError(() => new Error('Failed to add course'));
+      })
+    );
+  }
 }
