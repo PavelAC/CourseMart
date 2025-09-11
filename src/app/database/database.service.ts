@@ -49,4 +49,23 @@ export class DatabaseService {
     );
   }
 
+    saveUserProfile(uid: string, email: string, displayName: string, role: 'student' | 'instructor' = 'student'): Observable<void> {
+    const userRef = doc(db, `users/${uid}`);
+    const userData: Omit<UserProfile, 'enrolledCourses' | 'createdCourses' | 'bio' | 'website'> = {
+      uid,
+      email,
+      displayName,
+      role,
+      photoURL: undefined,
+      createdAt: Timestamp.fromDate(new Date()),
+      updatedAt: Timestamp.fromDate(new Date())
+    };
+    return from(setDoc(userRef, userData)).pipe(
+      tap(() => console.log('User profile saved successfully!')),
+      catchError((error) => {
+        console.error('Firestore Error:', error);
+        return throwError(() => new Error('Failed to save user profile'));
+      })
+    );
+  }
 }
