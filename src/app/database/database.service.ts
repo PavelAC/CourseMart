@@ -22,8 +22,8 @@ import { db } from "../../environments/environments";
 import { UserProfile } from "../models/user.model";
 import { Course } from "../models/course.model";
 import { Lesson } from "../models/lesson.model";
-// import { Category } from "../models/category.model";
-// import { Enrollment } from "../models/enrollment.model";
+import { Category } from "../models/category.model";
+import { Enrollment } from "../models/enrollment.model";
 // import { Review } from "../models/review.model";
 // import { Payment } from "../models/payment.model";
 
@@ -289,6 +289,58 @@ export class DatabaseService {
       catchError((error) => {
         console.error('Firestore Error:', error);
         return throwError(() => new Error('Failed to delete lesson'));
+      })
+    );
+  }
+
+  // ----------------------------
+  // CATEGORY CRUD
+  // ----------------------------
+
+  getCategories(): Observable<Category[]> {
+    const categoriesRef = collection(db, 'categories');
+    const q = query(categoriesRef, orderBy('name', 'asc'));
+    return from(getDocs(q)).pipe(
+      map((querySnapshot) => {
+        return querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data()
+        } as Category));
+      }),
+      catchError((error) => {
+        console.error('Firestore Error:', error);
+        return throwError(() => new Error('Failed to get categories'));
+      })
+    );
+  }
+  
+  addCategory(category: Omit<Category, 'id'>): Observable<string> {
+    const categoriesRef = collection(db, 'categories');
+    return from(addDoc(categoriesRef, category)).pipe(
+      map((docRef) => docRef.id),
+      catchError((error) => {
+        console.error('Firestore Error:', error);
+        return throwError(() => new Error('Failed to add category'));
+      })
+    );
+  }
+
+  updateCategory(categoryId: string, updates: Partial<Category>): Observable<void> {
+    const categoryRef = doc(db, `categories/${categoryId}`);
+    return from(updateDoc(categoryRef, updates)).pipe(
+      catchError((error) => {
+        console.error('Firestore Error:', error);
+        return throwError(() => new Error('Failed to update category'));
+      })
+    );
+  }
+
+  deleteCategory(categoryId: string): Observable<void> {
+    const categoryRef = doc(db, `categories/${categoryId}`);
+    return from(deleteDoc(categoryRef)).pipe(
+      catchError((error) => {
+        console.error('Firestore Error:', error);
+        return throwError(() => new Error('Failed to delete category'));
       })
     );
   }
