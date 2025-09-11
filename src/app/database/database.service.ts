@@ -49,7 +49,7 @@ export class DatabaseService {
     );
   }
 
-    saveUserProfile(uid: string, email: string, displayName: string, role: 'student' | 'instructor' = 'student'): Observable<void> {
+  saveUserProfile(uid: string, email: string, displayName: string, role: 'student' | 'instructor' = 'student'): Observable<void> {
     const userRef = doc(db, `users/${uid}`);
     const userData: Omit<UserProfile, 'enrolledCourses' | 'createdCourses' | 'bio' | 'website'> = {
       uid,
@@ -68,4 +68,18 @@ export class DatabaseService {
       })
     );
   }
+
+  updateUserProfile(uid: string, updates: Partial<UserProfile>): Observable<void> {
+    const userRef = doc(db, `users/${uid}`);
+    return from(updateDoc(userRef, {
+      ...updates,
+      updatedAt: Timestamp.fromDate(new Date())
+    })).pipe(
+      catchError((error) => {
+        console.error('Firestore Error:', error);
+        return throwError(() => new Error('Failed to update user profile'));
+      })
+    );
+  }
+  
 }
