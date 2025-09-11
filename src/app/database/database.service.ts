@@ -21,7 +21,7 @@ import { db } from "../../environments/environments";
 // Import all models
 import { UserProfile } from "../models/user.model";
 import { Course } from "../models/course.model";
-// import { Lesson } from "../models/lesson.model";
+import { Lesson } from "../models/lesson.model";
 // import { Category } from "../models/category.model";
 // import { Enrollment } from "../models/enrollment.model";
 // import { Review } from "../models/review.model";
@@ -224,4 +224,42 @@ export class DatabaseService {
       })
     );
   }
+  // ----------------------------
+  // LESSON CRUD (Subcollection of courses)
+  // ----------------------------
+
+  getLessons(courseId: string): Observable<Lesson[]> {
+    const lessonsRef = collection(db, `courses/${courseId}/lessons`);
+    const q = query(lessonsRef, orderBy('order', 'asc'));
+    return from(getDocs(q)).pipe(
+      map((querySnapshot) => {
+        return querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data()
+        } as Lesson));
+      }),
+      catchError((error) => {
+        console.error('Firestore Error:', error);
+        return throwError(() => new Error('Failed to get lessons'));
+      })
+    );
+  }
+
+  getLesson(courseId: string, lessonId: string): Observable<Lesson | null> {
+    const lessonRef = doc(db, `courses/${courseId}/lessons/${lessonId}`);
+    return from(getDoc(lessonRef)).pipe(
+      map((docSnap) => {
+        if (docSnap.exists()) {
+          return { id: docSnap.id, ...docSnap.data() } as Lesson;
+        }
+        return null;
+      }),
+      catchError((error) => {
+        console.error('Firestore Error:', error);
+        return throwError(() => new Error('Failed to get lesson'));
+      })
+    );
+  }
+  
+
 }
