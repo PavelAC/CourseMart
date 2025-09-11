@@ -272,5 +272,14 @@ export class DatabaseService {
       })
     );
   }
-
+  
+  updateLesson(courseId: string, lessonId: string, updates: Partial<Lesson>): Observable<void> {
+    const lessonRef = doc(db, `courses/${courseId}/lessons/${lessonId}`);
+    return from(updateDoc(lessonRef, updates)).pipe(
+      catchError((error) => {
+        console.error('Firestore Error:', error);
+        return throwError(() => new Error('Failed to update lesson'));
+      })
+    );
+  }
 }
