@@ -260,6 +260,17 @@ export class DatabaseService {
       })
     );
   }
-  
+
+  addLesson(courseId: string, lesson: Omit<Lesson, 'id'>): Observable<string> {
+    const lessonsRef = collection(db, `courses/${courseId}/lessons`);
+    return from(addDoc(lessonsRef, lesson)).pipe(
+      map((docRef) => docRef.id),
+      tap((lessonId) => console.log('Lesson added with ID:', lessonId)),
+      catchError((error) => {
+        console.error('Firestore Error:', error);
+        return throwError(() => new Error('Failed to add lesson'));
+      })
+    );
+  }
 
 }
