@@ -1,0 +1,418 @@
+import { Injectable } from "@angular/core";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  addDoc,
+  deleteDoc,
+  collection,
+  getDocs,
+  query,
+  where,
+  orderBy,
+  writeBatch,
+  runTransaction,
+  Timestamp
+} from "firebase/firestore";
+import { catchError, from, map, Observable, switchMap, tap, throwError } from "rxjs";
+import { db } from "../../environments/environments";
+
+// Import all models
+import { UserProfile } from "../models/user.model";
+import { Course } from "../models/course.model";
+import { Lesson } from "../models/lesson.model";
+import { Category } from "../models/category.model";
+import { Enrollment } from "../models/enrollment.model";
+// import { Review } from "../models/review.model";
+// import { Payment } from "../models/payment.model";
+
+@Injectable({ providedIn: 'root' })
+export class DatabaseService {
+  // ----------------------------
+  // USER CRUD
+  // ----------------------------
+
+  getUserProfile(uid: string): Observable<UserProfile | null> {
+    const userRef = doc(db, `users/${uid}`);
+    return from(getDoc(userRef)).pipe(
+      map((docSnap) => {
+        if (docSnap.exists()) {
+          return docSnap.data() as UserProfile;
+        }
+        return null;
+      }),
+      catchError((error) => {
+        console.error('Firestore Error:', error);
+        return throwError(() => new Error('Failed to get user profile'));
+      })
+    );
+  }
+
+  saveUserProfile(uid: string, email: string, displayName: string, role: 'student' | 'instructor' = 'student'): Observable<void> {
+    const userRef = doc(db, `users/${uid}`);
+    const userData: Omit<UserProfile, 'enrolledCourses' | 'createdCourses' | 'bio' | 'website' | 'photoURL'> = {
+      uid,
+      email,
+      displayName,
+      role,
+      createdAt: Timestamp.fromDate(new Date()),
+      updatedAt: Timestamp.fromDate(new Date())
+    };
+    return from(setDoc(userRef, userData)).pipe(
+      tap(() => console.log('User profile saved successfully!')),
+      catchError((error) => {
+        console.error('Firestore Error:', error);
+        return throwError(() => new Error('Failed to save user profile'));
+      })
+    );
+  }
+
+  updateUserProfile(uid: string, updates: Partial<UserProfile>): Observable<void> {
+    const userRef = doc(db, `users/${uid}`);
+    return from(updateDoc(userRef, {
+      ...updates,
+      updatedAt: Timestamp.fromDate(new Date())
+    })).pipe(
+      catchError((error) => {
+        console.error('Firestore Error:', error);
+        return throwError(() => new Error('Failed to update user profile'));
+      })
+    );
+  }
+
+  // ----------------------------
+  // COURSE CRUD
+  // ----------------------------
+
+   getCourses(): Observable<Course[]> {
+    const coursesRef = collection(db, 'courses');
+    const q = query(coursesRef, orderBy('createdAt', 'desc'));
+    return from(getDocs(q)).pipe(
+      map((querySnapshot) => {
+        return querySnapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            ...data,
+            createdAt: (data["createdAt"] as Timestamp).toDate()
+          } as Course;
+        });
+      }),
+      catchError((error) => {
+        console.error('Firestore Error:', error);
+        return throwError(() => new Error('Failed to get courses'));
+      })
+    );
+  }
+
+  getPublishedCourses(): Observable<Course[]> {
+    const coursesRef = collection(db, 'courses');
+    const q = query(coursesRef, where('status', '==', 'published'));
+    return from(getDocs(q)).pipe(
+      map((querySnapshot) => {
+        return querySnapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            ...data,
+            createdAt: (data["createdAt"] as Timestamp).toDate()
+          } as Course;
+        });
+      }),
+      catchError((error) => {
+        console.error('Firestore Error:', error);
+        return throwError(() => new Error('Failed to get published courses'));
+      })
+    );
+  }
+
+  getCoursesByInstructor(instructorId: string): Observable<Course[]> {
+    const coursesRef = collection(db, 'courses');
+    const q = query(coursesRef, where('instructorId', '==', instructorId));
+    return from(getDocs(q)).pipe(
+      map((querySnapshot) => {
+        return querySnapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            ...data,
+            createdAt: (data["createdAt"] as Timestamp).toDate()
+          } as Course;
+        });
+      }),
+      catchError((error) => {
+        console.error('Firestore Error:', error);
+        return throwError(() => new Error('Failed to get instructor courses'));
+      })
+    );
+  }
+
+  getCoursesByCategory(categoryId: string): Observable<Course[]> {
+    const coursesRef = collection(db, 'courses');
+    const q = query(coursesRef,
+      where('categoryId', '==', categoryId),
+      where('status', '==', 'published')
+    );
+    return from(getDocs(q)).pipe(
+      map((querySnapshot) => {
+        return querySnapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            ...data,
+            createdAt: (data["createdAt"] as Timestamp).toDate()
+          } as Course;
+        });
+      }),
+      catchError((error) => {
+        console.error('Firestore Error:', error);
+        return throwError(() => new Error('Failed to get category courses'));
+      })
+    );
+  }
+
+  getCourse(courseId: string): Observable<Course | null> {
+    const courseRef = doc(db, `courses/${courseId}`);
+    return from(getDoc(courseRef)).pipe(
+      map((docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          return { id: docSnap.id, ...data, createdAt: (data["createdAt"] as Timestamp).toDate() } as Course;
+        }
+        return null;
+      }),
+      catchError((error) => {
+        console.error('Firestore Error:', error);
+        return throwError(() => new Error('Failed to get course'));
+      })
+    );
+  }
+
+  addCourse(course: Omit<Course, 'id'>): Observable<string> {
+    const coursesRef = collection(db, 'courses');
+    const courseData = {
+      ...course,
+      createdAt: Timestamp.fromDate(new Date())
+    };
+    return from(addDoc(coursesRef, courseData)).pipe(
+      map((docRef) => docRef.id),
+      tap((courseId) => console.log('Course added with ID:', courseId)),
+      catchError((error) => {
+        console.error('Firestore Error:', error);
+        return throwError(() => new Error('Failed to add course'));
+      })
+    );
+  }
+
+    updateCourse(courseId: string, updates: Partial<Course>): Observable<void> {
+    const courseRef = doc(db, `courses/${courseId}`);
+    return from(updateDoc(courseRef, updates)).pipe(
+      catchError((error) => {
+        console.error('Firestore Error:', error);
+        return throwError(() => new Error('Failed to update course'));
+      })
+    );
+  }
+
+  deleteCourse(courseId: string): Observable<void> {
+    const courseRef = doc(db, `courses/${courseId}`);
+    return from(deleteDoc(courseRef)).pipe(
+      catchError((error) => {
+        console.error('Firestore Error:', error);
+        return throwError(() => new Error('Failed to delete course'));
+      })
+    );
+  }
+  // ----------------------------
+  // LESSON CRUD (Subcollection of courses)
+  // ----------------------------
+
+  getLessons(courseId: string): Observable<Lesson[]> {
+    const lessonsRef = collection(db, `courses/${courseId}/lessons`);
+    const q = query(lessonsRef, orderBy('order', 'asc'));
+    return from(getDocs(q)).pipe(
+      map((querySnapshot) => {
+        return querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data()
+        } as Lesson));
+      }),
+      catchError((error) => {
+        console.error('Firestore Error:', error);
+        return throwError(() => new Error('Failed to get lessons'));
+      })
+    );
+  }
+
+  getLesson(courseId: string, lessonId: string): Observable<Lesson | null> {
+    const lessonRef = doc(db, `courses/${courseId}/lessons/${lessonId}`);
+    return from(getDoc(lessonRef)).pipe(
+      map((docSnap) => {
+        if (docSnap.exists()) {
+          return { id: docSnap.id, ...docSnap.data() } as Lesson;
+        }
+        return null;
+      }),
+      catchError((error) => {
+        console.error('Firestore Error:', error);
+        return throwError(() => new Error('Failed to get lesson'));
+      })
+    );
+  }
+
+  addLesson(courseId: string, lesson: Omit<Lesson, 'id'>): Observable<string> {
+    const lessonsRef = collection(db, `courses/${courseId}/lessons`);
+    return from(addDoc(lessonsRef, lesson)).pipe(
+      map((docRef) => docRef.id),
+      tap((lessonId) => console.log('Lesson added with ID:', lessonId)),
+      catchError((error) => {
+        console.error('Firestore Error:', error);
+        return throwError(() => new Error('Failed to add lesson'));
+      })
+    );
+  }
+
+  updateLesson(courseId: string, lessonId: string, updates: Partial<Lesson>): Observable<void> {
+    const lessonRef = doc(db, `courses/${courseId}/lessons/${lessonId}`);
+    return from(updateDoc(lessonRef, updates)).pipe(
+      catchError((error) => {
+        console.error('Firestore Error:', error);
+        return throwError(() => new Error('Failed to update lesson'));
+      })
+    );
+  }
+  
+  deleteLesson(courseId: string, lessonId: string): Observable<void> {
+    const lessonRef = doc(db, `courses/${courseId}/lessons/${lessonId}`);
+    return from(deleteDoc(lessonRef)).pipe(
+      catchError((error) => {
+        console.error('Firestore Error:', error);
+        return throwError(() => new Error('Failed to delete lesson'));
+      })
+    );
+  }
+
+  // ----------------------------
+  // CATEGORY CRUD
+  // ----------------------------
+
+  getCategories(): Observable<Category[]> {
+    const categoriesRef = collection(db, 'categories');
+    const q = query(categoriesRef, orderBy('name', 'asc'));
+    return from(getDocs(q)).pipe(
+      map((querySnapshot) => {
+        return querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data()
+        } as Category));
+      }),
+      catchError((error) => {
+        console.error('Firestore Error:', error);
+        return throwError(() => new Error('Failed to get categories'));
+      })
+    );
+  }
+  
+  addCategory(category: Omit<Category, 'id'>): Observable<string> {
+    const categoriesRef = collection(db, 'categories');
+    return from(addDoc(categoriesRef, category)).pipe(
+      map((docRef) => docRef.id),
+      catchError((error) => {
+        console.error('Firestore Error:', error);
+        return throwError(() => new Error('Failed to add category'));
+      })
+    );
+  }
+
+  updateCategory(categoryId: string, updates: Partial<Category>): Observable<void> {
+    const categoryRef = doc(db, `categories/${categoryId}`);
+    return from(updateDoc(categoryRef, updates)).pipe(
+      catchError((error) => {
+        console.error('Firestore Error:', error);
+        return throwError(() => new Error('Failed to update category'));
+      })
+    );
+  }
+
+  deleteCategory(categoryId: string): Observable<void> {
+    const categoryRef = doc(db, `categories/${categoryId}`);
+    return from(deleteDoc(categoryRef)).pipe(
+      catchError((error) => {
+        console.error('Firestore Error:', error);
+        return throwError(() => new Error('Failed to delete category'));
+      })
+    );
+  }
+
+  // ----------------------------
+  // ENROLLMENT CRUD
+  // ----------------------------
+
+  enrollInCourse(userId: string, courseId: string): Observable<void> {
+    const enrollmentsRef = collection(db, 'enrollments');
+    const q = query(enrollmentsRef,
+      where('userId', '==', userId),
+      where('courseId', '==', courseId)
+    );
+    return from(getDocs(q)).pipe(
+      map(querySnapshot => {
+        if (!querySnapshot.empty) {
+          throw new Error('User already enrolled in this course');
+        }
+        const enrollmentData: Omit<Enrollment, 'id'> = {
+          userId,
+          courseId,
+          enrollmentDate: Timestamp.fromDate(new Date()),
+          completionStatus: 0,
+          completedLessons: []
+        };
+        return enrollmentData;
+      }),
+      switchMap(enrollmentData => from(addDoc(enrollmentsRef, enrollmentData))),
+      map(() => void 0),
+      catchError((error) => {
+        console.error('Enrollment error:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  getUserEnrollments(userId: string): Observable<Enrollment[]> {
+    const enrollmentsRef = collection(db, 'enrollments');
+    const q = query(enrollmentsRef, where('userId', '==', userId));
+    return from(getDocs(q)).pipe(
+      map((querySnapshot) => {
+        return querySnapshot.docs.map((doc) => {
+          const data = doc.data();
+          let enrollmentDate = data["enrollmentDate"];
+          if (enrollmentDate && typeof enrollmentDate.toDate === 'function') {
+            enrollmentDate = enrollmentDate.toDate();
+          }
+          return {
+            id: doc.id,
+            ...data,
+            enrollmentDate
+          } as Enrollment;
+        });
+      }),
+      catchError((error) => {
+        console.error('Firestore Error:', error);
+        return throwError(() => new Error('Failed to get enrollments'));
+      })
+    );
+  }
+
+  updateEnrollmentProgress(enrollmentId: string, completedLessons: string[], completionStatus: number): Observable<void> {
+    const enrollmentRef = doc(db, `enrollments/${enrollmentId}`);
+    return from(updateDoc(enrollmentRef, {
+      completedLessons,
+      completionStatus
+    })).pipe(
+      catchError((error) => {
+        console.error('Firestore Error:', error);
+        return throwError(() => new Error('Failed to update enrollment progress'));
+      })
+    );
+  }
+}
