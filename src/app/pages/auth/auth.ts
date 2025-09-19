@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
+import { UserRegistration, UserLogin } from '../../models/user.model';
 
 @Component({
   selector: 'app-auth',
@@ -19,7 +21,8 @@ export class AuthComponent implements OnInit {
 
   constructor(
     private formBuilder: FormBuilder,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -88,69 +91,64 @@ export class AuthComponent implements OnInit {
   }
 
   private login(email: string, password: string): void {
-    // Simulate API call
-    setTimeout(() => {
-      try {
-        // Here you would integrate with your authentication service
-        console.log('Login attempt:', { email, password });
-        
-        // Simulate success
+    const credentials: UserLogin = { email, password };
+    this.authService.login(credentials).subscribe({
+      next: (user) => {
         this.successMessage = 'Login successful! Redirecting...';
         this.isLoading = false;
-        
-        // Redirect after success
         setTimeout(() => {
           this.router.navigate(['/']);
         }, 1500);
-        
-      } catch (error) {
-        this.error = 'Login failed. Please check your credentials.';
+      },
+      error: (err) => {
+        this.error = err.message || 'Login failed. Please check your credentials.';
         this.isLoading = false;
       }
-    }, 1500);
+    });
   }
 
   private signUp(email: string, password: string): void {
-    // Simulate API call
-    setTimeout(() => {
-      try {
-        // Here you would integrate with your authentication service
-        console.log('Sign up attempt:', { email, password });
-        
-        // Simulate success
-        this.successMessage = 'Account created successfully! Please check your email to verify your account.';
+    const registration: UserRegistration = {
+      email,
+      password,
+      displayName: email.split('@')[0], // You may want to add a displayName field to your form
+      role: 'student' // Default role, or add a role selector to your form
+    };
+    this.authService.signup(registration).subscribe({
+      next: (result) => {
+        this.successMessage = result.message || 'Account created successfully! Please check your email to verify your account.';
         this.isLoading = false;
-        
-        // Switch to login mode after successful signup
         setTimeout(() => {
           this.isLoginMode = true;
           this.authForm.reset();
           this.clearMessages();
         }, 2000);
-        
-      } catch (error) {
-        this.error = 'Sign up failed. Please try again.';
+      },
+      error: (err) => {
+        this.error = err.message || 'Sign up failed. Please try again.';
         this.isLoading = false;
       }
-    }, 1500);
+    });
   }
 
   onForgotPassword(): void {
     const email = this.authForm.get('email')?.value;
-    
     if (!email) {
       this.error = 'Please enter your email address first.';
       return;
     }
-
     this.isLoading = true;
     this.clearMessages();
-
-    // Simulate forgot password API call
-    setTimeout(() => {
-      this.successMessage = 'Password reset link sent to your email!';
-      this.isLoading = false;
-    }, 1500);
+    this.authService.resetPassword(email).subscribe({
+      next: (result) => {
+        this.successMessage = result.message || 'Password reset link sent to your email!';
+        this.isLoading = false;
+      },
+      error: (err) => {
+        this.error = err.message || 'Failed to send password reset link.';
+        this.isLoading = false;
+      }
+    });
   }
 
   clearMessages(): void {

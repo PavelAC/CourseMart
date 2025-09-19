@@ -11,7 +11,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyDm9taDbAJ1VtbV31hgSX7OzdN_2rC6zLo",
   authDomain: "coursemart-227a0.firebaseapp.com",
   projectId: "coursemart-227a0",
-  storageBucket: "coursemart-227a0.firebasestorage.app",
+  storageBucket: "coursemart-227a0.appspot.com",
   messagingSenderId: "299005735117",
   appId: "1:299005735117:web:a0266ec99d2f1e506bf984",
   measurementId: "G-WRJHC6LKQ4"
