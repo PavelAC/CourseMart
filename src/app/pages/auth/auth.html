@@ -1,0 +1,172 @@
+
+
+<div class="min-h-screen bg-transparent relative overflow-hidden">
+  <!-- Animated Background Elements -->
+
+
+  <div class="auth-layout">
+    <!-- Left Side - Auth Form -->
+    <div class="auth-left animate-slide-in-left">
+      <div class="auth-form-wrapper">
+        <div class="auth-container glass-card">
+          <div class="auth-header">
+            <div class="auth-icon">
+              <span class="icon">🔐</span>
+            </div>
+            <h1 class="auth-title gradient-text">
+              {{ isLoginMode ? 'Welcome Back' : 'Join CourseMart' }}
+            </h1>
+            <p class="auth-subtitle">
+              {{ isLoginMode ? 'Sign in to continue your learning journey' : 'Create an account to start learning today' }}
+            </p>
+          </div>
+
+          <form [formGroup]="authForm" (ngSubmit)="onSubmit()" class="auth-form">
+            <!-- Alert Messages -->
+            @if (error) {
+              <div class="alert alert-error">
+                <span class="alert-icon">⚠️</span>
+                <span>{{ error }}</span>
+              </div>
+            }
+            @if (successMessage) {
+              <div class="alert alert-success">
+                <span class="alert-icon">✅</span>
+                <span>{{ successMessage }}</span>
+              </div>
+            }
+
+            <!-- Email Field -->
+            <div class="form-group">
+              <label for="email" class="form-label">
+                <span class="label-icon">📧</span>
+                Email Address
+              </label>
+              <input 
+                type="email" 
+                id="email" 
+                class="form-input"
+                [class.invalid]="isFieldInvalid('email')"
+                formControlName="email" 
+                placeholder="Enter your email address"
+                (input)="clearMessages()"
+              />
+              @if (isFieldInvalid('email')) {
+                <div class="field-error">
+                  <span class="error-icon">❌</span>
+                  {{ getFieldError('email') }}
+                </div>
+              }
+            </div>
+
+            <!-- Password Field -->
+            <div class="form-group">
+              <label for="password" class="form-label">
+                <span class="label-icon">🔒</span>
+                Password
+              </label>
+              <input 
+                type="password" 
+                id="password" 
+                class="form-input"
+                [class.invalid]="isFieldInvalid('password')"
+                formControlName="password" 
+                placeholder="Enter your password"
+                (input)="clearMessages()"
+              />
+              @if (isFieldInvalid('password')) {
+                <div class="field-error">
+                  <span class="error-icon">❌</span>
+                  {{ getFieldError('password') }}
+                </div>
+              }
+            </div>
+
+            <!-- Confirm Password Field (Sign Up Only) -->
+            @if (!isLoginMode) {
+              <div class="form-group">
+                <label for="confirmPassword" class="form-label">
+                  <span class="label-icon">🔐</span>
+                  Confirm Password
+                </label>
+                <input 
+                  type="password" 
+                  id="confirmPassword" 
+                  class="form-input"
+                  [class.invalid]="isFieldInvalid('confirmPassword')"
+                  formControlName="confirmPassword" 
+                  placeholder="Confirm your password"
+                  (input)="clearMessages()"
+                />
+                @if (isFieldInvalid('confirmPassword')) {
+                  <div class="field-error">
+                    <span class="error-icon">❌</span>
+                    {{ getFieldError('confirmPassword') }}
+                  </div>
+                }
+              </div>
+            }
+
+            <!-- Forgot Password (Login Only) -->
+            @if (isLoginMode) {
+              <div class="forgot-password">
+                <button type="button" class="forgot-link" (click)="onForgotPassword()">
+                  Forgot your password?
+                </button>
+              </div>
+            }
+
+            <!-- Action Buttons -->
+            <div class="auth-actions">
+              <button 
+                class="auth-submit"
+                type="submit" 
+                [disabled]="authForm.invalid || isLoading"
+                [class.loading]="isLoading"
+              >
+                @if (isLoading) {
+                  <span class="loading-spinner"></span>
+                }
+                {{ isLoginMode ? 'Sign In' : 'Create Account' }}
+              </button>
+              <div class="auth-divider">
+                <span>or</span>
+              </div>
+              <button 
+                class="auth-switch" 
+                type="button" 
+                (click)="onSwitchMode()"
+                [disabled]="isLoading"
+              >
+                {{ isLoginMode ? 'Create new account' : 'Sign in instead' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Side - Info/Benefits -->
+    <div class="auth-right animate-slide-in-right">
+      <div class="auth-info">
+        <div class="auth-logo">
+          <span class="icon">🎓</span>
+        </div>
+        <h1 class="auth-brand-title drop-shadow-lg">
+          CourseMart
+          <span class="auth-brand-subtitle">Your Learning Hub</span>
+        </h1>
+        <h2 class="auth-brand-tagline drop-shadow">Learn. Grow. Succeed.</h2>
+        <p class="auth-brand-desc drop-shadow-sm">
+          Join thousands of learners and unlock your potential with expert-led courses, flexible learning, and a vibrant community.
+        </p>
+        <div class="auth-benefits-list">
+          <div class="auth-benefit"><span class="icon">✔️</span>10,000+ Courses</div>
+          <div class="auth-benefit"><span class="icon">✔️</span>Industry Certificates</div>
+          <div class="auth-benefit"><span class="icon">✔️</span>Learn Anywhere</div>
+          <div class="auth-benefit"><span class="icon">✔️</span>Community Access</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
